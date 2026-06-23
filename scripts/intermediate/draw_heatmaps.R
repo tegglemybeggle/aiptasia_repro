@@ -57,7 +57,7 @@ draw_heatmaps <- function(s1, a1, s2, a2, filename) {
     show_column_names = FALSE,
 
     column_title = "Sym",
-    row_title = "I",       
+    row_title = " I",       
     column_title_gp = gpar(fontsize = 28, fontface = "bold"),
     row_title_gp    = gpar(fontsize = 32, fontface = "bold"),
     row_title_rot = 0,

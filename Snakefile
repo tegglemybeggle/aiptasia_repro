@@ -2,6 +2,7 @@ configfile:"config/samples.yaml"
 configfile:"config/config.yaml"
 
 big_data_dir = config["big_data_dir"]
+tomtom_db_dir = config["tomtom_db_dir"]
 
 with open("config/samples.txt", "r") as f:
     samples = [line.strip() for line in f]
@@ -13,7 +14,15 @@ final_figures = [
     "figures/2C_1.pdf",
     "figures/2C_2.pdf",
     "figures/2D.png",
-    "figures/2E.pdf"
+    "figures/2E.pdf",
+    "figures/2F.png",
+    "figures/2G.pdf",
+    "figures/meme.html",
+    "figures/tomtom.html",
+    "data/fimo_out",
+    "figures/3DE",
+    "figures/3FG",
+    "figures/4A.pdf"
 ]
 
 
@@ -125,6 +134,18 @@ rule get_early_genes:
         Rscript scripts/intermediate/get_early_genes.R
         '''
 
+rule get_diff_genes:
+    input:
+        "data/all_results.rds"
+    output:
+        "data/sym_up_genes.txt",
+        "data/sym_down_genes.txt"
+    shell:
+        '''
+        Rscript scripts/intermediate/get_diff_genes.R
+        '''
+
+
 rule get_clusters:
     input:
         "data/early_genes.txt",
@@ -161,19 +182,140 @@ rule build_all_results:
         '''
 
 
+rule get_motif_counts:
+    input:
+        "data/fimo_out"
+    output:
+        "data/motif_counts.rds"
+    shell:
+        '''
+        Rscript scripts/intermediate/get_motif_counts.R
+        '''
+
+
 rule meme:
     input:
         "data/fixed_top_promoters.fa"
     output:
-        directory("data/meme_out")
+        directory("data/meme_out"),
+        "figures/meme.html"
     shell:
         '''
         meme \
         -nmotifs 4 \
         -dna \
         -maxw 25 \
-        -oc /home/liamt/cleves/new/amid/data/meme_out \
+        -oc data/meme_out \
         data/fixed_top_promoters.fa
+        cp data/meme_out/meme.html figures
+        '''
+
+
+rule tomtom:
+    input:
+        "data/meme_out"
+    output:
+        directory("data/tomtom_out"),
+        "figures/tomtom.html"
+    shell:
+        '''
+        tomtom \
+        -oc data/tomtom_out \
+        data/meme_out/meme.txt \
+        /home/liamt/meme/db/motif_databases/JASPAR/JASPAR_CORE_2016.meme
+        cp data/tomtom_out/tomtom.html figures
+        '''
+
+
+rule fimo:
+    input:
+        "data/meme_out",
+        "data/fixed_all_promoters.fa"
+    output:
+        directory("data/fimo_out"),
+    shell:
+        '''
+        fimo \
+        -oc data/fimo_out \
+        --no-pgc \
+        data/meme_out/meme.html \
+        data/fixed_all_promoters.fa
+        '''
+
+
+rule get_top100:
+    input:
+        "data/dds.rds"
+    output:
+        "data/top100_genes.txt"
+    shell:
+        '''
+        Rscript scripts/intermediate/get_top100.R
+        '''
+
+
+rule build_bed:
+    input:
+        "genome/genomic.gtf"
+    output:
+        "data/genes.bed"
+    shell:
+        r'''
+        awk -F'\t' '
+        $3=="gene" {{
+            gene = $9
+            sub(/.*gene_id "/, "", gene)
+            sub(/".*/, "", gene)
+            print $1 "\t" ($4-1) "\t" $5 "\t" gene "\t.\t" $7
+        }}
+        ' genome/genomic.gtf > data/genes.bed
+        '''
+
+
+rule get_top_promoters:
+    input:
+        "data/genes.bed",
+        "genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna",
+        "data/top100_genes.txt"
+    output:
+        temp("data/top100_promoters.fa")
+    shell:
+        '''
+        ./scripts/intermediate/get_top_promoters
+        '''
+
+
+rule get_all_promoters:
+    input:
+        "data/genes.bed",
+        "genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna"
+    output:
+        temp("data/all_promoters.fa")
+    shell:
+        '''
+        ./scripts/intermediate/get_all_promoters
+        '''
+
+
+rule fix_top_promoters:
+    input:
+        "data/top100_promoters.fa"
+    output:
+        "data/fixed_top_promoters.fa"
+    shell:
+        '''
+        python scripts/intermediate/fix_promoters.py data/top100_promoters.fa data/fixed_top_promoters.fa
+        '''
+
+
+rule fix_all_promoters:
+    input:
+        "data/all_promoters.fa"
+    output:
+        "data/fixed_all_promoters.fa"
+    shell:
+        '''
+        python scripts/intermediate/fix_promoters.py data/all_promoters.fa data/fixed_all_promoters.fa
         '''
 
 
@@ -195,7 +337,9 @@ rule fig_2A:
 rule fig_2B:
     input:
         "data/dds.rds",
-        "data/gene_info.rds"
+        "data/gene_info.rds",
+        "data/cluster1.txt",
+        "data/cluster2.txt"
     output:
         "figures/2B_1.pdf",
         "figures/2B_2.pdf"
@@ -208,11 +352,13 @@ rule fig_2B:
 rule fig_2C:
     input:
         "data/dds.rds",
-        "genome/go_annotation.gaf"
+        "genome/go_annotation.gaf",
+        "data/cluster1.txt",
+        "data/cluster2.txt"
     output:
         "figures/2C_1.pdf",
         "figures/2C_2.pdf",
-        "gene_2_go.map"
+        "data/gene2go.map"
     shell:
         '''
         Rscript scripts/final/2C.R
@@ -225,7 +371,8 @@ rule fig_2DE:
         "data/cluster2.txt",
         "data/dds.rds",
         "data/rlog.rds",
-        "data/gene_info.rds"
+        "data/gene_info.rds",
+        "figures/2A.png"
     output:
         "figures/2D.png",
         "figures/2E.pdf"
@@ -241,7 +388,9 @@ rule fig_2F:
         "data/cluster2.txt",
         "data/dds.rds",
         "data/rlog.rds",
-        "data/all_results.rds"
+        "data/all_results.rds",
+        "figures/2A.png",
+        "figures/2D.png"
     output:
         "figures/2F.png"
     shell:
@@ -263,5 +412,35 @@ rule fig_2G:
         '''
 
 
-'''rule MEME:'''
+rule fig_3DE:
+    input:
+        "data/motif_counts.rds"
+    output:
+        directory("figures/3DE")
+    shell:
+        '''
+        Rscript scripts/final/3D,E.R
+        '''
 
+
+rule fig_3FG:
+    input:
+        "data/motif_counts.rds"
+    output:
+        directory("figures/3FG")
+    shell:
+        '''
+        Rscript scripts/final/3F,G.R
+        '''
+
+rule fig_4A:
+    input:
+        "data/all_results.rds",
+        "data/sym_up_genes.txt",
+        "data/sym_down_genes.txt"
+    output:
+        "figures/4A.pdf"
+    shell:
+        '''
+        Rscript scripts/final/4A.R
+        '''

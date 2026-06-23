@@ -1,0 +1,21 @@
+samtools faidx genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna
+cut -f1,2 genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna.fai > genome/genome.sizes
+
+
+bedtools flank \
+-i data/genes.bed \
+-g genome/genome.sizes \
+-l 500 \
+-r 0 \
+-s | \
+awk '$3-$2==500' > data/all_promoters.bed
+
+
+bedtools getfasta \
+  -fi genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna \
+  -bed data/all_promoters.bed \
+  -s \
+  -nameOnly \
+  > data/all_promoters.fa
+
+rm data/all_promoters.bed

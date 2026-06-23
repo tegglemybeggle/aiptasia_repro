@@ -1,0 +1,23 @@
+samtools faidx genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna
+cut -f1,2 genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna.fai > genome/genome.sizes
+
+grep -F -f data/top100_genes.txt data/genes.bed > data/top100_genes.bed
+
+bedtools flank \
+-i data/top100_genes.bed \
+-g genome/genome.sizes \
+-l 500 \
+-r 0 \
+-s | \
+awk '$3-$2==500' > data/top100_promoters.bed
+
+
+bedtools getfasta \
+  -fi genome/GCF_001417965.1_Aiptasia_genome_1.1_genomic.fna \
+  -bed data/top100_promoters.bed \
+  -s \
+  -nameOnly \
+  > data/top100_promoters.fa
+
+rm data/top100_genes.bed
+rm data/top100_promoters.bed

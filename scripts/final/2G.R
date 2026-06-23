@@ -1,5 +1,6 @@
 library(DESeq2)
 
+
 all_results <- readRDS("data/all_results.rds")
 
 res <- all_results[["SYM_APO_0h"]]
