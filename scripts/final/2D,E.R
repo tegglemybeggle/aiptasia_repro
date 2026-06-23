@@ -48,12 +48,14 @@ draw_heatmaps(sym1, apo1, sym2, apo2, "figures/2D.png")
 
 
 source("scripts/intermediate/get_plots.R")
+sym_up_1 <- order(rowMeans(sym1[, 4 : 6, drop = FALSE]), decreasing = TRUE)
+sym_up_2 <- order(rowMeans(sym2[, 4 : 6, drop = FALSE]), decreasing = TRUE)
 
-c1_genes = sample(rownames(sym1), size = 3)
-c2_genes = sample(rownames(sym2), size = 3)
+c1_genes = head(rownames(sym1[sym_up_1, ]), n = 2)
+c2_genes = head(rownames(sym2[sym_up_2, ]), n = 2)
 
 pdf("figures/2E.pdf")
 
-plot_genes(c(c1_genes, c2_genes), 3, 2)
+plot_genes(c(c1_genes, c2_genes), 2, 2)
 
 dev.off()
