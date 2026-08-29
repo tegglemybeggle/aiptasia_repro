@@ -28,6 +28,7 @@ cluster2_genes <- readLines("data/cluster2.txt")
 cluster1_genes <- cluster1_genes[cluster1_genes %in% diff_genes]
 cluster2_genes <- cluster2_genes[cluster2_genes %in% diff_genes]
 
+writeLines(c(cluster1_genes, cluster2_genes), "data/supp/sheet5_genes.txt")
 
 sym1 <- mat_sym_rel[cluster1_genes, ]
 sym2 <- mat_sym_rel[cluster2_genes, ]

@@ -3,8 +3,10 @@ library(dplyr)
 library(tidyr)
 library(stringr)
 library(ggplot2)
+library(yaml)
 
 gene_info <- readRDS("data/gene_info.rds")
+config <- read_yaml("config/config.yaml")
 
 
 dds <- readRDS("data/dds.rds")
@@ -41,15 +43,16 @@ plot_genes <- function(gene_list, cols, rows) {
   ggplot(long_avgd %>% filter(gene %in% gene_list),
          aes(x=time, y=count, color=pop, group=pop)) +
   geom_line(linewidth=1) +
-  scale_color_manual(values = c("Sym" = "blue", "Apo" = "red")) +
-  scale_x_continuous(breaks = c(0, 3, 12, 24, 48, 96)) + 
+  scale_color_manual(values = c("Sym" = config$color$Sym, "Apo" = config$color$Apo)) +
+  scale_x_continuous(breaks = c(0, 3, 12, 24, 48, 96), guide = guide_axis(n.dodge = 2)) + 
   theme_classic() +
   theme(
     strip.background = element_blank(),
     strip.text = element_text(size = 8),
     legend.position = "none"
   ) +
-  facet_wrap(~label, nrow = rows, ncol = cols, scales = "free_y") 
+  facet_wrap(~label, nrow = rows, ncol = cols, scales = "free_y", axes = "all_x", axis.labels = "margins") +
+  labs(y = "Expression(Normalized read count)") 
 }
 
     

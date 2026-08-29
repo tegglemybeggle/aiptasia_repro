@@ -40,7 +40,7 @@ for (idx in 1:length(ids)){
   p <- ggplot(df, aes(x = l2fc)) + 
     geom_density(aes(color = "All Genes"), linewidth = 1) +
     geom_density(data = plot_df, aes(color = label), linewidth = 1) +
-    labs(color = paste0("Putative ", motifs[idx], " Binding Sites"), x = "Log2 Fold Change (3h : 0h)") +
+    labs(color = paste0("Putative ", motifs[idx], " Binding Sites"), x = "Log2 Fold Change (3h : 0h)", y = "Density") +
     theme_classic()
 
   ggsave(

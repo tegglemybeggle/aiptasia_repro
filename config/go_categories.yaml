@@ -1,0 +1,31 @@
+categories:
+  nitrogen:
+    label: "Nitrogen Transport"
+    roots:
+      - GO:0071705
+
+  glucose:
+    label: "Glucose Transport"
+    roots:
+      - GO:1904659
+
+  lipid:
+    label: "Lipid Metabolism"
+    roots:
+      - GO:0006629
+
+  ecm:
+    label: "Extracellular Matrix"
+    roots:
+      - GO:0031012
+
+  immunity:
+    label: "Immunity and Stress"
+    roots:
+      - GO:0006950
+      - GO:0045087
+
+  arachidonic:
+    label: "Arachidonic Acid Metabolism"
+    roots:
+      - GO:1903963

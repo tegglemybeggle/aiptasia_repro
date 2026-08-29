@@ -18,11 +18,18 @@ t0_mean_sym <- rowMeans(mat_sym[, 1:3, drop = FALSE])
 
 mat_sym_rel <- mat_sym - t0_mean_sym
 
-km <- kmeans(mat_sym_rel, 2, nstart=50)
+set.seed(123)
 
+km <- kmeans(mat_sym_rel, centers = 2, nstart=50)
 
-cluster1_genes = rownames(mat_sym_rel)[km$cluster == 1]
-cluster2_genes = rownames(mat_sym_rel)[km$cluster == 2]
+if (sum(km$cluster == 1) > sum(km$cluster == 2)){
+  cluster1_genes = rownames(mat_sym_rel)[km$cluster == 1]
+  cluster2_genes = rownames(mat_sym_rel)[km$cluster == 2]
+} else {
+  cluster1_genes = rownames(mat_sym_rel)[km$cluster == 2]
+  cluster2_genes = rownames(mat_sym_rel)[km$cluster == 1]
+}
+
 
 writeLines(cluster1_genes, "data/cluster1.txt")
 writeLines(cluster2_genes, "data/cluster2.txt")

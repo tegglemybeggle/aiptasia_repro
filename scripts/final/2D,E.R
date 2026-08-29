@@ -28,6 +28,10 @@ apo2 <- mat_apo_rel[cluster2_genes, ]
 cluster1_low <- rowMeans(apo1[, 4:6, drop = FALSE]) <= 1
 cluster2_low <- rowMeans(apo2[, 4:6, drop = FALSE]) <= 1
 
+sheet3_genes <- c(rownames(sym1[cluster1_low, ]), rownames(sym2[cluster2_low, ]))
+
+writeLines(sheet3_genes, "data/supp/sheet3_genes.txt")
+
 sym1 <- sym1[cluster1_low, ]
 sym2 <- sym2[cluster2_low, ]
 apo1 <- apo1[cluster1_low, ]

@@ -1,6 +1,9 @@
 library(ComplexHeatmap)
 library(circlize)
 library(magick)
+library(yaml)
+
+config <- read_yaml("config/config.yaml")
 
 dpi = 250
 cell_height = 0.5
@@ -15,7 +18,6 @@ for (x in 1:6){
 }
 
 legend_param = list(
-  title = "L2FC",
   at = c(-4, -2, 0, 2, 4),
   labels = gt_render(c("-4 or lower", "-2", "0", "2", "4 or higher")),
   legend_height = unit(5, "cm")
@@ -24,7 +26,6 @@ legend_param = list(
 dummy_legend = Legend(
   col_fun = dummy_col_fun,
   at = c(-4, -2, 0, 2, 4),
-  title = "L2FC",
   labels = gt_render(c("-4 or lower", "-2", "0", "2", "4 or higher")),
   legend_gp = gpar(fill = "white", col = "white"),
   labels_gp = gpar(col = "white"),
@@ -56,9 +57,9 @@ draw_heatmaps <- function(s1, a1, s2, a2, filename) {
     show_row_names = FALSE,
     show_column_names = FALSE,
 
-    column_title = "Sym",
+    column_title = "Symbiotic",
     row_title = " I",       
-    column_title_gp = gpar(fontsize = 28, fontface = "bold"),
+    column_title_gp = gpar(fontsize = 28, col = config$color$Sym, fontface = "bold"),
     row_title_gp    = gpar(fontsize = 32, fontface = "bold"),
     row_title_rot = 0,
 
@@ -77,9 +78,9 @@ draw_heatmaps <- function(s1, a1, s2, a2, filename) {
     show_row_names = FALSE,
     show_column_names = FALSE,
 
-    column_title = "Apo",
+    column_title = "Aposymbiotic",
 
-    column_title_gp = gpar(fontsize = 28, fontface = "bold"),
+    column_title_gp = gpar(fontsize = 28, col = config$color$Apo, fontface = "bold"),
 
     show_heatmap_legend = FALSE,
     col = col_fun,

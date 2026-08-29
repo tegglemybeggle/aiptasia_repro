@@ -1,8 +1,9 @@
 library(DESeq2)
 library(ComplexHeatmap)
 library(circlize)
+library(yaml)
 
-
+config <- read_yaml("config/config.yaml")
 rlog <- readRDS("data/rlog.rds")
 mat <- assay(rlog)
 mat_sym <- mat[, grep("Sym", colnames(mat)), drop = FALSE]
@@ -57,15 +58,15 @@ dir.create(
 for (j in seq_along(ids)){
   
   df <- motif_counts |>
-    filter(motif_alt_id == paste0("MEME-", ids[j]) & n >= 3) |>
+    filter(motif_alt_id == paste0("MEME-", ids[j]) & n >= 4) |>
     arrange(desc(n))
   
   genes <- df$sequence_name[df$sequence_name %in% rownames(mat)]
   mat_i <- mat_sym_rel[genes, ]
 
   cluster_col <- case_when(
-    genes %in% cluster1 ~ "green",
-    genes %in% cluster2 ~ "yellow",
+    genes %in% cluster1 ~ "cluster1",
+    genes %in% cluster2 ~ "cluster2",
     TRUE ~ "white"
   )
 
@@ -79,13 +80,13 @@ for (j in seq_along(ids)){
   rows = nrow(mat_i)
   height = cell_height * rows
   
-  row_anno <- rowAnnotation(
+  right_anno <- rowAnnotation(
 
     cluster = anno_simple(
       cluster_col,
       col = c(
-        green = "green",
-        yellow = "yellow",
+        cluster1 = config$color$Cluster1,
+        cluster2 = config$color$Cluster2,
         white = "white"
       ),
       width = unit(6, "mm"),
@@ -101,6 +102,11 @@ for (j in seq_along(ids)){
     show_annotation_name = FALSE
   )
 
+  site_counts <- df$n[match(genes, df$sequence_name)]
+
+  left_anno <- rowAnnotation(
+    sites = anno_text(site_counts)
+  )
 
 
   heatmap_i <- Heatmap(
@@ -110,7 +116,8 @@ for (j in seq_along(ids)){
     show_row_names = FALSE,
     show_column_names = FALSE,
 
-    right_annotation = row_anno,
+    right_annotation = right_anno,
+    left_annotation = left_anno,
 
     heatmap_legend_param = legend_param,
     col = col_fun,

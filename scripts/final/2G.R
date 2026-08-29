@@ -1,6 +1,7 @@
 library(DESeq2)
+library(yaml)
 
-
+config <- read_yaml("config/config.yaml")
 all_results <- readRDS("data/all_results.rds")
 
 res <- all_results[["SYM_APO_0h"]]
@@ -42,14 +43,14 @@ p <- ggplot(df, aes(x = l2fc)) +
   scale_color_manual(
     values =  c(
       "All" = "black",
-      "Cluster 1" = "yellow",
-      "Cluster 2" = "green"
+      "Cluster 1" = config$color$Cluster1,
+      "Cluster 2" = config$color$Cluster2
     )
   ) +
 
   coord_cartesian(xlim = c(-3, 3)) +
   theme(legend.position = "right") +
-  labs(x = expression(Log[2] * " Fold-difference Sym/Apo at t = 0"))
+  labs(x = expression(Log[2] * " Fold-difference Sym/Apo at t = 0"), y = "Density")
 
 pdf("figures/2G.pdf")
 
